@@ -1,7 +1,6 @@
 #lang racket
 (require (lib "trace.ss"))
 
-
 (define var? symbol?)
 
 (define (apply-subst x e)
@@ -48,7 +47,7 @@
     (cond ((and (¬? x) (not (¬? y))) (equate(cadr x) y t))
           ((and (¬? y) (not (¬? x))) (equate x (cadr y) t))
           (else '()) ))
-  (map (λ(th) (instantiate-clause(append (cdr s) (cdr c)) th))
+  (map (λ(th) (instantiate-clause(append (cdr c) (cdr s)) th))
        (equate-lit (car c) (car s) '()) ))
 
 (define (¬? x) (and (pair? x) (eq? (car x) '¬)))
@@ -69,13 +68,14 @@
   (define fresh-id gensym) ;(make-var-generator 'x))
   (define (res-moves s)
     (append-map(λ(c) (map(λ(r) (list r c 1)) ; (s a w)
-                         (resolve s (rename-clause c fresh-id)) ))
+                         (remove-duplicates (resolve s (rename-clause c fresh-id))) ))
                +axioms))
   (define res-goal? null?)
   (define (goal? x) ; check if null or is just (¬(answer ...))
   (cond ((eq? x '()) #t)
         ((and (eq? 1 (length x)) (pair? x)) (eq? 'answer (first (car(cdr(car x))))))
         (else #f)) )
+  ;(define (res-heuristic state) (printf "~a\n" state) (length (car state)))
   (define res-heuristic length)
   (A*-graph-search ¬conjecs goal? res-moves res-heuristic))
 
@@ -111,46 +111,11 @@
          (heap-add-all! Q (map (λ(x) (add-SAW-to-heap x curr)) SAWs)))
        (if (= (heap-count Q) 0) no-solution (loop))])))
 
-
-(define axioms1 '(
-                  ((Criminal x)(¬(American x))(¬(Weapon y))
-                               (¬(Sells x y z))(¬(Hostile z)))
-                  ((Enemy (Nono) (America)))
-                  ((Owns (Nono) (M1) ))
-                  ((Missile (M1) ))
-                  ((Sells (West) x (Nono)) (¬(Missile x)) (¬(Owns (Nono) x)))
-                  ((American (West)))
-                  ((Weapon x) (¬(Missile x)))
-                  ((Hostile x)(¬(Hostile (Mother-of x))))
-                  ((Hostile x)(¬(Enemy x (America))))
-                  ((Hostile x)(¬(Hostile (Father-of x))))
-                  ))
-
-(define conjs1 '( ((¬(Criminal(West)))) ))
-
-;(ATP axioms1 conjs1)
-
-(define axioms2 '(
-                  ((=(* x 1) x))
-                  ((=(* 1 x) x))
-                  ((=(* x(/ x))1))
-                  ((=(*(/ x)x)1))
-                  ((=(*(/ x)x)1))
-                  ((=(* x w)v)(¬(=(* x y)u))(¬(=(* y z)w))(¬(=(* u z)v)))
-                  ((=(* u z)v)(¬(=(* x y)u))(¬(=(* y z)w))(¬(=(* x w)v)))
-                  ((=(* x x)1))
-                  ((=(*(f)(g))(h))) 
-                  ))
-
-(define conjs2 '(((¬(=(*(g)(f)) (h))))))
-
-;(ATP axioms2 conjs2)               
-
 (define block_axioms '(
                        ((poss(move b x y s)) (¬(on b x s)) (¬(clear b s)) (¬(clear y s))
                                              (¬(block b)) (¬(block y)) (¬(≠ b x)) (¬(≠ b y)) (¬(≠ x y)) )
                        ((on b y (move b x y s)) (¬(poss(move b x y s))) )
-                       ((clear x (move b x y s)) (¬(pos(move b x y s))) )
+                       ((clear x (move b x y s)) (¬(poss(move b x y s))) )
                        ((on b2 x2(move b x y s)) (¬(on b2 x2 s)) (¬(≠ b2 b))
                                                  (¬(poss(move b x y s))))
                        ((clear y2(move b x y s)) (¬(clear y2 s)) (¬(≠ y2 y))
@@ -163,7 +128,7 @@
                        ((on b2 x2(movetotable b x s)) (¬(on b2 x2 s)) (¬(≠ b2 b))
                                                       (¬(poss(movetotable b x s))) )
                        ((clear y2(movetotable b x s)) (¬(clear y2 s)) (¬(≠ y2 (t)))
-                                                      (¬(poss(movetotable b x s))))
+                                                      (¬(poss(movetotable b x s))) )
                        
                        ;;; distinct objects
                        ((≠(a)(b))) ((≠(b)(a)))
@@ -183,10 +148,10 @@
                        ((on(a)(t)0))
                        ((on(c)(a)0))
                        ((clear(b)0))
-                       ((clear(c)0))                       
+                       ((clear(c)0))                     
                        ))
 
-(define block_conj '((¬(on(a)(b)s)) (¬(on(b)(c)s)) (¬(answer s)) ))
-
-(trace resolve)
-(ATP block_axioms block_conj) 
+(define block_conj '(((¬(on(a)(b)s)) (¬(on(b)(c)s)) (¬(answer s)) )))
+;(trace resolve)
+(time (ATP block_axioms block_conj))
+;(define h '((¬ (on (a) (b) s)) (¬ (on (b) (c) s)) (¬ (answer s))))
