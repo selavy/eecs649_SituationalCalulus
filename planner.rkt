@@ -157,4 +157,4 @@
 (define conj2 '(((¬(on(a)(b)s)) (¬(answer s)) )))
 
 ;(trace resolve)
-(time (ATP block_axioms conj))
+(time (ATP block_axioms conj1))
