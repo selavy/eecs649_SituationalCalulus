@@ -11,12 +11,10 @@
 (define (unify x y e)
   (define (extend-subst v x e)
     (cons (cons v x)
-          (map (λ(p) (cons (car p) (apply-subst (cdr p) (list (cons v x))))) e)))
-  
+          (map (λ(p) (cons (car p) (apply-subst (cdr p) (list (cons v x))))) e)))  
   (define (occur v x)
     (or (and (var? x) (eq? v x))
-        (and (pair? x)(ormap (λ(y) (occur v y)) (cdr x))) ))
-  
+        (and (pair? x)(ormap (λ(y) (occur v y)) (cdr x))) ))  
   (and e (let ((x (apply-subst x e))
                (y (apply-subst y e)))
            (cond ((equal? x y) e)
@@ -47,7 +45,8 @@
     (cond ((and (¬? x) (not (¬? y))) (equate(cadr x) y t))
           ((and (¬? y) (not (¬? x))) (equate x (cadr y) t))
           (else '()) ))
-  (map (λ(th) (instantiate-clause(append (cdr c) (cdr s)) th))
+  ;(printf "node => ~a\n" s)
+  (map (λ(th) (remove-duplicates (instantiate-clause(append (cdr c) (cdr s)) th)))
        (equate-lit (car c) (car s) '()) ))
 
 (define (¬? x) (and (pair? x) (eq? (car x) '¬)))
@@ -65,12 +64,13 @@
   (define (move-pos-lit-to-front c)
     (append (filter (λ(l)(not(¬? l))) c) (filter ¬? c)))
   (define +axioms (map move-pos-lit-to-front axioms))  
-  (define fresh-id gensym) ;(make-var-generator 'x))
+  ;(define fresh-id gensym) ;(make-var-generator 'x))
+  (define fresh-id (make-var-generator 'x))
   (define (res-moves s)
     (append-map(λ(c) (map(λ(r) (list r c 1)) ; (s a w)
-                         (remove-duplicates (resolve s (rename-clause c fresh-id))) ))
+                         (resolve s (rename-clause c fresh-id))))
                +axioms))
-  (define res-goal? null?)
+  ;(define res-goal? null?)
   (define (goal? x) ; check if null or is just (¬(answer ...))
   (cond ((eq? x '()) #t)
         ((and (eq? 1 (length x)) (pair? x)) (eq? 'answer (first (car(cdr(car x))))))
@@ -123,6 +123,7 @@
                        
                        ((poss(movetotable b x s)) (¬(on b x s)) (¬(clear b s))
                                                   (¬(block b)) (¬(block x)) (¬(≠ b x)))
+
                        ((on b(t) (movetotable b x s)) (¬(poss(movetotable b x s))))
                        ((clear x (movetotable b x s)) (¬(poss(movetotable b x s))))
                        ((on b2 x2(movetotable b x s)) (¬(on b2 x2 s)) (¬(≠ b2 b))
@@ -136,7 +137,7 @@
                        ((≠(b)(c))) ((≠(c)(b)))
                        ((≠(a)(t))) ((≠(t)(a)))
                        ((≠(b)(t))) ((≠(t)(b)))
-                       ((≠(c)(t))) ((≠(t)(c)))
+                       ((≠(c)(t))) ((≠(t)(c))) 
                        
                        ;;; blocks
                        ((block(a)))
@@ -148,10 +149,12 @@
                        ((on(a)(t)0))
                        ((on(c)(a)0))
                        ((clear(b)0))
-                       ((clear(c)0))                     
+                       ((clear(c)0))
                        ))
 
-(define block_conj '(((¬(on(a)(b)s)) (¬(on(b)(c)s)) (¬(answer s)) )))
+(define conj '(((¬(on(a)(b)s)) (¬(on(b)(c)s)) (¬(answer s)) )))
+(define conj1 '(((¬(on(b)(c)s)) (¬(answer s)) )))
+(define conj2 '(((¬(on(a)(b)s)) (¬(answer s)) )))
+
 ;(trace resolve)
-(time (ATP block_axioms block_conj))
-;(define h '((¬ (on (a) (b) s)) (¬ (on (b) (c) s)) (¬ (answer s))))
+(time (ATP block_axioms conj1))
