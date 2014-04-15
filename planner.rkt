@@ -46,7 +46,7 @@
           ((and (¬? y) (not (¬? x))) (equate x (cadr y) t))
           (else '()) ))
   ;(printf "node => ~a\n" s)
-  (map (λ(th) (remove-duplicates (instantiate-clause(append (cdr c) (cdr s)) th)))
+  (map (λ(th) (instantiate-clause(append (cdr c) (cdr s)) th))
        (equate-lit (car c) (car s) '()) ))
 
 (define (¬? x) (and (pair? x) (eq? (car x) '¬)))
@@ -75,7 +75,6 @@
   (cond ((eq? x '()) #t)
         ((and (eq? 1 (length x)) (pair? x)) (eq? 'answer (first (car(cdr(car x))))))
         (else #f)) )
-  ;(define (res-heuristic state) (printf "~a\n" state) (length (car state)))
   (define res-heuristic length)
   (A*-graph-search ¬conjecs goal? res-moves res-heuristic))
 
@@ -105,6 +104,7 @@
     (hash-set! ht (get-hash (node-state curr)) curr)
     (heap-remove-min! Q)
     (cond
+      ;[(> (heap-count Q) 100) (for ([x (in-heap Q)]) (printf "~a\n" (node-state x))) 'failure]
       [(goal? (node-state curr)) (print-solution curr)]
       [else
        (let ([SAWs (filter not-in-hash? (moves (node-state curr)))])
@@ -157,4 +157,4 @@
 (define conj2 '(((¬(on(a)(b)s)) (¬(answer s)) )))
 
 ;(trace resolve)
-(time (ATP block_axioms conj1))
+(time (ATP block_axioms conj))

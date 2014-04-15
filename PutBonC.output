@@ -1,0 +1,16 @@
+cpu time: 12 real time: 11 gc time: 0
+'((start ((¬ (on (b) (c) s)) (¬ (answer s))) 0 2 2)
+  (((on b y (move b x y s)) (¬ (poss (move b x y s)))) ((¬ (poss (move (b) x6 (c) x7))) (¬ (answer (move (b) x6 (c) x7)))) 1 2 3)
+  (((poss (move b x y s)) (¬ (on b x s)) (¬ (clear b s)) (¬ (clear y s)) (¬ (block b)) (¬ (block y)) (¬ (≠ b x)) (¬ (≠ b y)) (¬ (≠ x y)))
+   ((¬ (on (b) x6 x7)) (¬ (clear (b) x7)) (¬ (clear (c) x7)) (¬ (block (b))) (¬ (block (c))) (¬ (≠ (b) x6)) (¬ (≠ (b) (c))) (¬ (≠ x6 (c))) (¬ (answer (move (b) x6 (c) x7))))
+   2
+   9
+   11)
+  (((on (b) (t) 0)) ((¬ (clear (b) 0)) (¬ (clear (c) 0)) (¬ (block (b))) (¬ (block (c))) (¬ (≠ (b) (t))) (¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 3 8 11)
+  (((clear (b) 0)) ((¬ (clear (c) 0)) (¬ (block (b))) (¬ (block (c))) (¬ (≠ (b) (t))) (¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 4 7 11)
+  (((clear (c) 0)) ((¬ (block (b))) (¬ (block (c))) (¬ (≠ (b) (t))) (¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 5 6 11)
+  (((block (b))) ((¬ (block (c))) (¬ (≠ (b) (t))) (¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 6 5 11)
+  (((block (c))) ((¬ (≠ (b) (t))) (¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 7 4 11)
+  (((≠ (b) (t))) ((¬ (≠ (b) (c))) (¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 8 3 11)
+  (((≠ (b) (c))) ((¬ (≠ (t) (c))) (¬ (answer (move (b) (t) (c) 0)))) 9 2 11)
+  (((≠ (t) (c))) ((¬ (answer (move (b) (t) (c) 0)))) 10 1 11))
