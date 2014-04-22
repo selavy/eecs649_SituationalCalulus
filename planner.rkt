@@ -1,4 +1,5 @@
 #lang racket
+
 (require (lib "trace.ss"))
 
 (define var? symbol?)
@@ -39,15 +40,16 @@
   (apply-subst body(map(λ(id) (cons id (fresh-id))) ids)))
 
 (define (resolve s c)
+  (define (is-answer? l) (eq? (caadr l) 'answer))
+  (define (move-answer-to-back clause) (append (filter (λ(l)(not(is-answer? l))) clause) (filter is-answer? clause)))
   (define (equate x y e) ; returns '() or ( e )
     (let ((t (unify x y e))) (if t(list t) '())))
   (define (equate-lit x y t)
     (cond ((and (¬? x) (not (¬? y))) (equate(cadr x) y t))
           ((and (¬? y) (not (¬? x))) (equate x (cadr y) t))
           (else '()) ))
-  ;(printf "node => ~a\n" s)
-  (map (λ(th) (instantiate-clause(append (cdr c) (cdr s)) th))
-       (equate-lit (car c) (car s) '()) ))
+  (map (λ(th) (instantiate-clause (move-answer-to-back (remove-duplicates (append (cdr s) (cdr c)))) th))
+       (equate-lit (car s) (car c) '()) ))
 
 (define (¬? x) (and (pair? x) (eq? (car x) '¬)))
 
@@ -157,4 +159,4 @@
 (define conj2 '(((¬(on(a)(b)s)) (¬(answer s)) )))
 
 ;(trace resolve)
-(time (ATP block_axioms conj1))
+(time (ATP block_axioms conj))
